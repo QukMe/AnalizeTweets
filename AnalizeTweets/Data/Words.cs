@@ -36,4 +36,15 @@ public class Words
     {
         return $"{Word}";
     }
+
+    public override bool Equals(object? obj)
+    {
+        if (this.GetType() != obj.GetType())
+        {
+            return false;
+        }
+        
+        Words word = (Words)obj;
+        return this.Word == word.Word && this.Weight == word.Weight;
+    }
 }
