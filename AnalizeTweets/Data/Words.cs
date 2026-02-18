@@ -6,10 +6,10 @@ public class Words
 {
     [Index(0)]
     public string Word { get; set; }
-    private double _weight;
+    private double? _weight;
     
     [Index(1)]
-    public double Weight
+    public double? Weight
     {
         get => _weight;
         set
@@ -31,7 +31,7 @@ public class Words
         Word = word;
     }
 
-    public Words(string word, double weight)
+    public Words(string word, double? weight)
     {
         Word = word;
         Weight = weight;

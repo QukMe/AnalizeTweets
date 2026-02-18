@@ -7,7 +7,7 @@ namespace AnalizeTweets.Service;
 
 public static class SentimentsParser
 {
-    public static Dictionary<string, double> ParseSentiments(string fileName)
+    public static Dictionary<string, double?> ParseSentiments(string fileName)
     {
         var config = new CsvConfiguration(CultureInfo.InvariantCulture)
         {
@@ -18,7 +18,7 @@ public static class SentimentsParser
         using (var csv = new CsvReader(reader, config))
         {
             var sentiments = csv.GetRecords<Words>();
-            var sentimentsDictionary = new Dictionary<string, double>();
+            var sentimentsDictionary = new Dictionary<string, double?>();
             foreach (var sr in sentiments)
             {
                 sentimentsDictionary.Add(sr.Word, sr.Weight);

@@ -23,7 +23,9 @@ public static class TweetsParser
             {
                 var tweet = new Tweets(
                     GetDateData(line, regexDateData), 
-                    GetTweetsWords(GetTweetsText(line, regexTweetsText), sentiments, regexTweetsWords), 
+                    GetTweetsWords(
+                        GetTweetsText(line, regexTweetsText), 
+                        sentiments, regexTweetsWords), 
                     GetTweetsLocation(line, regexTweetsLocation)
                     );
                 tweets.Add(tweet);
@@ -54,7 +56,7 @@ public static class TweetsParser
         return regex.Match(line);
     }
 
-    private static List<Words> GetTweetsWords(Match tweetText, Dictionary<string, double> sentiments, Regex regex)
+    private static List<Words> GetTweetsWords(Match tweetText, Dictionary<string, double?> sentiments, Regex regex)
     {
         var tweetWords = regex.Matches(tweetText.Value);
         
@@ -63,10 +65,10 @@ public static class TweetsParser
         foreach (Match word  in tweetWords)
         {
             string wordText = word.Value;
-            double weight = 0;
-            if (sentiments.TryGetValue(wordText.ToLower(), out double wordWeight))
+            double? weight = null;
+            if (sentiments.TryGetValue(wordText.ToLower(), out double? wordWeight))
             {
-                weight += wordWeight;
+                weight = wordWeight.Value;
             }
             words.Add(new Words(wordText, weight));
         }
