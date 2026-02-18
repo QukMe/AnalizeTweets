@@ -6,70 +6,69 @@ namespace AnalizeTweets.Service;
 
 public static class TweetsParser
 {
-    public static List<Tweets> ParseTweets(string fileName)
+    public static List<Tweets> ParseTweets(string tweetsFileName, string sentimentsFileName)
     {
         var tweets = new List<Tweets>();
-        var readLine = new List<String>();
-        using (var streamReader = new StreamReader(fileName))
+        var sentiments = SentimentsParser.ParseSentiments(sentimentsFileName);
+
+        var regexTweetsLocation = new Regex(@"-?\d+\.\d+");
+        var regexDateData = new Regex(@"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}");
+        var regexTweetsText = new Regex(@"\t([^\t]+)$");
+        var regexTweetsWords = new Regex(@"[A-Za-z]+");
+        
+        using (var streamReader = new StreamReader(tweetsFileName))
         {
             string line;
             while ((line = streamReader.ReadLine()) != null)
             {
-                readLine.Add(line);
+                var tweet = new Tweets(
+                    GetDateData(line, regexDateData), 
+                    GetTweetsWords(GetTweetsText(line, regexTweetsText), sentiments, regexTweetsWords), 
+                    GetTweetsLocation(line, regexTweetsLocation)
+                    );
+                tweets.Add(tweet);
             }
-        }
-        
-        foreach (var line in readLine)
-        {
-            var tweet = new Tweets(GetDateData(line), GetTweetsWords(GetTweetsText(line)), GetTweetsLocation(line));
-            tweets.Add(tweet);
         }
         return tweets;
     }
 
-    private static Location GetTweetsLocation(string line)
+    private static Location GetTweetsLocation(string line, Regex regex)
     {
-        string pattern = @"-?\d+\.\d+";
-        var _regex = new Regex(pattern);
-        
-        var tweetsLocation = _regex.Matches(line);
+        var tweetsLocation = regex.Matches(line);
         double latitude = double.Parse(tweetsLocation[0].Value, CultureInfo.InvariantCulture);
         double longitude = double.Parse(tweetsLocation[1].Value, CultureInfo.InvariantCulture);
         
         return new Location(latitude, longitude);
     }
 
-    private static DateTime GetDateData(string line)
+    private static DateTime GetDateData(string line, Regex regex)
     {
-        string pattern = @"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}";
-        var _regex = new Regex(pattern);
-        
-        var dateData = _regex.Match(line);
+        var dateData = regex.Match(line);
         DateTime date = DateTime.Parse(dateData.Value);
         
         return date;
     }
 
-    private static Match GetTweetsText(string line)
+    private static Match GetTweetsText(string line, Regex regex)
     {
-        string pattern = @"\t([^\t]+)$";
-        var _regex = new Regex(pattern);
-        
-        return _regex.Match(line);
+        return regex.Match(line);
     }
 
-    private static List<Words> GetTweetsWords(Match tweetText)
+    private static List<Words> GetTweetsWords(Match tweetText, Dictionary<string, double> sentiments, Regex regex)
     {
-        string pattern = @"[A-Za-z]+";
-        var _regex = new Regex(pattern);
-        
-        var tweetWords = _regex.Matches(tweetText.Value);
+        var tweetWords = regex.Matches(tweetText.Value);
         
         var words = new List<Words>();
 
-        foreach (var word in tweetWords)
+        foreach (Match word  in tweetWords)
         {
-            words.Add(new Words(word.ToString()));
+            string wordText = word.Value;
+            double weight = 0;
+            if (sentiments.TryGetValue(wordText.ToLower(), out double wordWeight))
+            {
+                weight += wordWeight;
+            }
+            words.Add(new Words(wordText, weight));
         }
         
         return words;

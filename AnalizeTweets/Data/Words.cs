@@ -1,9 +1,14 @@
+using CsvHelper.Configuration.Attributes;
+
 namespace AnalizeTweets.Data;
 
 public class Words
 {
+    [Index(0)]
     public string Word { get; set; }
     private double _weight;
+    
+    [Index(1)]
     public double Weight
     {
         get => _weight;

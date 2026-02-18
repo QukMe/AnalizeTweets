@@ -5,7 +5,19 @@ public class Tweets
     public DateTime DateData { get; set; }
     public List<Words>  Words { get; set; }
     public Location Location { get; set; }
-    public double TweetWeight { get; set; }
+    public double TweetWeight
+    {
+        get
+        {
+            double _totalTweetWeight = 0;
+            
+            foreach (var word in Words)
+            {
+                _totalTweetWeight += word.Weight;
+            }
+            return _totalTweetWeight / Words.Count != 0 ? _totalTweetWeight / Words.Count : 0;
+        }
+    }
 
     public Tweets()
     {
