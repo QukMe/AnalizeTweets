@@ -21,7 +21,7 @@ public class Location
         get => _longitude;
         set
         {
-            if (value >= -180.0 && value <= 180.0)
+           if (value >= -180.0 && value <= 180.0)
             {
                 _longitude = value;
             }
